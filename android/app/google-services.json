@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "111035250921",
+    "project_id": "respiratory-diseases-be002",
+    "storage_bucket": "respiratory-diseases-be002.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:111035250921:android:4b75c986f20efb93191878",
+        "android_client_info": {
+          "package_name": "com.example.respiratory_diseases"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeW-327EaqQ7en8llLW6z8X8eB5HKsJ6A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

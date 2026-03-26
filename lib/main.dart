@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:respiratory_diseases/view/admin/admin_add_disease_screen.dart';
+import 'package:respiratory_diseases/view/user/symptom_entry_screen.dart';
 import 'app/app_provider.dart';
 
 
@@ -29,7 +30,8 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
-        home: const AdminAddDiseaseScreen(),
+        // home: const AdminAddDiseaseScreen(),
+        home: const SymptomEntryScreen(),
       ),
     );
   }
