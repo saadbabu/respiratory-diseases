@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/disease_model.dart';
 import '../../providers/disease_provider.dart';
+import '../../providers/phone_auth_provider.dart';
+import '../clinicaldisclaime.dart'; // IMPORT THIS
 
 class AdminAddDiseaseScreen extends StatefulWidget {
   const AdminAddDiseaseScreen({super.key});
@@ -23,10 +25,10 @@ class _AdminAddDiseaseScreenState extends State<AdminAddDiseaseScreen> {
   List<Map<String, dynamic>> _medications = [];
 
   // High-Contrast Professional Palette
-  final Color bgCanvas = const Color(0xFFF9F5F6);      // Solid light base
-  final Color accentBerry = const Color(0xFFAD445A);   // Bold Pink-Red for buttons/icons
-  final Color textCharcoal = const Color(0xFF2D2727);  // High contrast text
-  final Color borderMuted = const Color(0xFFD1B0B7);   // Clear borders
+  final Color bgCanvas = const Color(0xFFF9F5F6);
+  final Color accentBerry = const Color(0xFFAD445A);
+  final Color textCharcoal = const Color(0xFF2D2727);
+  final Color borderMuted = const Color(0xFFD1B0B7);
 
   void _clearForm() {
     setState(() {
@@ -38,18 +40,49 @@ class _AdminAddDiseaseScreenState extends State<AdminAddDiseaseScreen> {
     });
   }
 
+  // --- LOGOUT DIALOG ---
+  void _showLogoutDialog(AuthSessionProvider auth) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Admin Logout", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text("Are you sure you want to exit the Pharmacist Portal?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Stay", style: TextStyle(color: textCharcoal)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              auth.signOut(); // This will trigger main.dart to show LoginScreen
+            },
+            child: Text("Logout", style: TextStyle(color: accentBerry, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<DiseaseProvider>();
+    final authProvider = context.read<AuthSessionProvider>(); // READ AUTH PROVIDER
 
     return Scaffold(
       backgroundColor: bgCanvas,
+      bottomNavigationBar: const ClinicalDisclaimer(),
       appBar: AppBar(
         title: Text("Pharmacist Admin Portal",
             style: TextStyle(color: textCharcoal, fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
+        // ADDED LOGOUT BUTTON HERE
+        leading: IconButton(
+          icon: Icon(Icons.power_settings_new_rounded, color: accentBerry),
+          onPressed: () => _showLogoutDialog(authProvider),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: accentBerry.withOpacity(0.3), height: 1),
@@ -57,7 +90,6 @@ class _AdminAddDiseaseScreenState extends State<AdminAddDiseaseScreen> {
       ),
       body: Stack(
         children: [
-          // Background Medical Pattern (Slightly darker for visibility)
           Positioned(
             bottom: -50,
             right: -50,
@@ -104,14 +136,14 @@ class _AdminAddDiseaseScreenState extends State<AdminAddDiseaseScreen> {
     );
   }
 
-  // --- UI BUILDING BLOCKS ---
+  // ... (Keep all your existing _build methods below: _buildContainer, _styledInput, etc.)
 
   Widget _buildContainer({required String title, required IconData icon, required Widget child}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white, // Standard white base
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: borderMuted, width: 1.5),
         boxShadow: [
@@ -256,7 +288,7 @@ class _AdminAddDiseaseScreenState extends State<AdminAddDiseaseScreen> {
       height: 55,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: textCharcoal, // Darker button for heavy focus
+          backgroundColor: textCharcoal,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onPressed: () async {

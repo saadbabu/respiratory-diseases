@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/user_model.dart'; // Import the new user-specific model
+import '../models/user_model.dart';
 
 class UserProvider with ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  // Uses the new User-specific model
   List<UserDiseaseModel> _results = [];
   List<UserDiseaseModel> get results => _results;
 
@@ -19,30 +18,35 @@ class UserProvider with ChangeNotifier {
     try {
       QuerySnapshot snapshot = await _db.collection('diseases').get();
 
-      // Normalize user input for better matching
+      // 1. Normalize user input: Lowercase, trim, and REMOVE HYPHENS
       List<String> cleanUserSymptoms = userSymptoms
-          .map((s) => s.toLowerCase().trim())
-          .where((s) => s.isNotEmpty)
+          .map((s) => s.toLowerCase().replaceAll('-', ' ').trim())
           .toList();
 
       for (var doc in snapshot.docs) {
-        // Use the symptoms_search field created by the Admin side
-        List dbSymptoms = doc['symptoms_search'] ?? [];
+        // Target the 'symptoms' array as you requested
+        List dbSymptoms = doc['symptoms'] ?? [];
+        if (dbSymptoms.isEmpty) continue;
 
-        // Flexible matching: checks if user input is inside DB symptoms or vice versa
-        bool isMatch = cleanUserSymptoms.any((userSymptom) {
-          return dbSymptoms.any((dbSymptom) =>
-          dbSymptom.toString().contains(userSymptom) ||
-              userSymptom.contains(dbSymptom.toString()));
-        });
+        // 2. Normalize DB symptoms: Lowercase, trim, and REMOVE HYPHENS
+        List<String> normalizedDb = dbSymptoms
+            .map((s) => s.toString().toLowerCase().replaceAll('-', ' ').trim())
+            .toList();
 
-        if (isMatch) {
-          // Add to results using the safe user-model factory
+        // 3. Check for 100% Match
+        // Does the user's list contain EVERY symptom from the DB?
+        bool isPerfectMatch = normalizedDb.every((dbS) =>
+            cleanUserSymptoms.contains(dbS));
+
+        // 4. Check for Symmetry (Exact same number of symptoms)
+        bool sameLength = normalizedDb.length == cleanUserSymptoms.length;
+
+        if (isPerfectMatch && sameLength) {
           _results.add(UserDiseaseModel.fromFirestore(doc));
         }
       }
     } catch (e) {
-      debugPrint("Diagnosis Error: $e");
+      debugPrint("Strict Diagnosis Error: $e");
     } finally {
       _isLoading = false;
       notifyListeners();

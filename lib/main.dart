@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:respiratory_diseases/providers/phone_auth_provider.dart';
 import 'package:respiratory_diseases/view/admin/admin_add_disease_screen.dart';
+import 'package:respiratory_diseases/view/phone_signin_screen.dart';
 import 'package:respiratory_diseases/view/user/symptom_entry_screen.dart';
 import 'app/app_provider.dart';
 
@@ -31,7 +33,22 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         // home: const AdminAddDiseaseScreen(),
-        home: const SymptomEntryScreen(),
+        home: Consumer<AuthSessionProvider>(
+          builder: (context, auth, _) {
+            // 1. If not logged in, show Login Screen
+            if (!auth.isAuthenticated) {
+              return const LoginScreen();
+            }
+
+            // 2. If logged in, check role
+            if (auth.isAdmin) {
+              return const AdminAddDiseaseScreen(); // Admin UI
+            } else {
+              return const SymptomCheckerDashboard(); // Standard User UI
+            }
+          },
+        ),
+        // home: const AdminAddDiseaseScreen(),
       ),
     );
   }
